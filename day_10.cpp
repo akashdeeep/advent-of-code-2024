@@ -413,60 +413,40 @@ vector<int> z_arr(string s) {
 //     return *p->s.begin();
 // }
 
+int n = 52, m;
 
+void foo(int x, int y, vector<string> &mat, vector<vector<int>> &path_vis, int &ans) {
+    if (mat[x][y] - '0' == 9) {
+        ans++;
+        // cout << x << " " << y << endl;
+        return;
+    }
+    int dx[] = {1, 0, -1, 0, 1};
+    path_vis[x][y] = 1;
+    for (int k = 0; k < 4; k++) {
+        int X = x + dx[k], Y = y + dx[k + 1];
+        if (X < n && X >= 0 && Y < m && Y >= 0 && !path_vis[X][Y] && (mat[X][Y] - '0') == (mat[x][y] - '0' + 1)) {
+            foo(X, Y, mat, path_vis, ans);
+        }
+    }
+    path_vis[x][y] = 0;
+}
 
 void solve() {
-    string s; cin >> s;
-    int n = s.size();
-    // cout << n << endl;
-    vector<pair<int, int>> arr;
-    int curr = 0;
-    for (int i = 0; i < n; i++) {
-        if (i % 2) {
-            arr.push_back({ -1, s[i] - '0'});
-        }
-        else {
-            arr.push_back({curr++, s[i] - '0'});
-        }
+    vector<string> mat(n);
+    for (string &s : mat) {
+        cin >> s;
     }
-    // for (auto it : arr) {
-    //     cout << it.first << " " << it.second << endl;
-    // }
-    cout << endl;
-    n = arr.size();
-    for (int i = n - 1; i >= 0; i--) {
-        if (arr[i].first == -1) continue;
-        int num = arr[i].first;
-        int cnt = arr[i].second;
-        for (int j = 0; j < i; j++) {
-            if (arr[j].first == -1 && arr[j].second >= cnt) {
-                arr.erase(arr.begin() + i);
-                arr.insert(arr.begin() + i, { -1, cnt});
-                int cnt2 = arr[j].second;
-                int diff = cnt2 - cnt;
-                arr.erase(arr.begin() + j);
-                arr.insert(arr.begin() + j, {num, cnt});
-                if (diff) {
-                    arr.insert(arr.begin() + j + 1, { -1, diff});
-                    i++;
-                }
-                break;
-            }
-        }
-    }
-    // for (auto it : arr) {
-    //     cout << it.first << " " << it.second << endl;
-    // }
-    vector<int> res;
+    m = mat[0].size();
     int ans = 0;
-    int curr2 = 0;
-    for (auto it : arr) {
-        if (it.first == -1) {
-            curr2 += it.second;
-            continue;
-        }
-        for (int j = 0; j < it.second; j++) {
-            ans += it.first * curr2++;
+    vector<vector<int>> path_vis(n, vector<int> (m));
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            set<pair<int, int>> st;
+            if (mat[i][j] == '0') {
+                foo(i, j, mat, path_vis, ans);
+                // ans += st.size();
+            }
         }
     }
     cout << ans << endl;
