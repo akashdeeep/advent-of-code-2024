@@ -414,12 +414,121 @@ vector<int> z_arr(string s) {
 // }
 
 
-int n = 8;
+int n = 50, m;
 
+int q = 20;
+
+// bool foo2(vector<string> &mat, int x, int y, int dir) {
+//     int n = mat.size(), m = mat[0].size();
+//     int dx[] = {1, 0, -1, 0, 1};
+// }
+
+void foo(vector<string> &mat, int dir, int &x, int &y) {
+    int n = mat.size(), m = mat[0].size();
+    int dx[] = {1, 0, -1, 0, 1};
+    vector<set<pair<int, int>>> walls;
+    bool valid = true;
+    walls.push_back({{x, y}});
+    // cout << x << " " << y << endl;
+    while (valid) {
+        set<pair<int, int>> new_wall;
+        auto last_wall = walls.back();
+        for (auto block : last_wall) {
+            int x = block.first, y = block.second;
+            int X = x + dx[dir], Y = y + dx[dir + 1];
+            if (mat[X][Y] == '#') {
+                valid = false;
+                break;
+            }
+            if (mat[X][Y] == '.') {
+                continue;
+            }
+            if (mat[X][Y] == '[') {
+                new_wall.insert({X, Y});
+                if (dir % 2 == 0) {
+                    new_wall.insert({X, Y + 1});
+                }
+            }
+            if (mat[X][Y] == ']') {
+                new_wall.insert({X, Y});
+                if (dir % 2 == 0) {
+                    new_wall.insert({X, Y - 1});
+                }
+            }
+        }
+        if (new_wall.size() == 0) break;
+        walls.push_back(new_wall);
+    }
+    if (!valid) return;
+    while (walls.size()) {
+        auto last_wall = walls.back(); walls.pop_back();
+        for (auto it : last_wall) {
+            mat[it.first + dx[dir]][it.second + dx[dir + 1]] = mat[it.first][it.second];
+            mat[it.first][it.second] = '.';
+        }
+    }
+    x += dx[dir]; y += dx[dir + 1];
+}
 
 
 void solve() {
+    vector<string> mat(n);
+    for (int i = 0; i < n; i++) {
+        string s; cin >> s;
+        for (char c : s) {
+            if (c == '#') {
+                mat[i] += "##";
+            }
+            if (c == 'O') {
+                mat[i] += "[]";
+            }
+            if (c == '.') {
+                mat[i] += "..";
+            }
+            if (c == '@') {
+                mat[i] += "@.";
+            }
+        }
+    }
+    for (string s : mat) {
+        cout << s << endl;
+    }
+    m = mat[0].size();
+    int x, y;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (mat[i][j] == '@') {
+                x = i; y = j;
+            }
+        }
+    }
+    int dx[] = {1, 0, -1, 0, 1};
+    map<char, int> mp;
+    mp['v'] = 0;
+    mp['<'] = 1;
+    mp['^'] = 2;
+    mp['>'] = 3;
+    while (q--) {
+        string s; cin >> s;
+        for (char c : s) {
+            // cout << x << " " << y << endl;
+            foo(mat, mp[c], x, y);
 
+            // for (auto it : mat) {
+            //     cout << it << endl;
+            // }
+            // cout << endl;
+        }
+    }
+    int ans = 0;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (mat[i][j] == '[') {
+                ans += 100 * i + j;
+            }
+        }
+    }
+    cout << ans << endl;
 }
 
 

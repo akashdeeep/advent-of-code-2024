@@ -414,12 +414,64 @@ vector<int> z_arr(string s) {
 // }
 
 
-int n = 8;
+int n = 320;
 
+struct Machine {
+    int ax, ay;
+    int bx, by;
+    int x, y;
 
+    int solve() {
+        int temp1 = (x * by - y * bx);
+        int temp2 = (ax * by - ay * bx);
+        int temp3 = (x * ay - y * ax);
+        int r = temp1 / temp2;
+        if (temp2 * r !=  temp1) return 0;
+        int s = temp3 / -temp2;
+        if (s * (-temp2) != temp3) return 0;
+        if (r < 0) return 0;
+        if (s < 0) return 0;
+        return 3 * r + s;
+    }
+};
+
+void parse_string(string s, vector<int> &nums) {
+    int curr = 0;
+    for (char c : s) {
+        if (isdigit(c)) {
+            curr = 10 * curr + (c - '0');
+        }
+        else {
+            if (curr) {
+                nums.push_back(curr);
+            }
+            curr = 0;
+        }
+    }
+    if (curr) {
+        nums.push_back(curr);
+    }
+}
+
+Machine get_machine(vector<int> nums) {
+    Machine machine = {nums[0], nums[1], nums[2], nums[3], nums[4] + 10000000000000, nums[5] + 10000000000000};
+    return machine;
+}
 
 void solve() {
-
+    int ans = 0;
+    for (int i = 0; i < n; i++) {
+        string s;
+        vector<int> nums;
+        for (int i = 0; i < 3; i++) {
+            getline(cin, s);
+            parse_string(s, nums);
+        }
+        getline(cin, s);
+        Machine machine = get_machine(nums);
+        ans += machine.solve();
+    }
+    cout << ans << endl;
 }
 
 

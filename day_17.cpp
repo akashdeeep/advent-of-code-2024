@@ -414,12 +414,119 @@ vector<int> z_arr(string s) {
 // }
 
 
-int n = 8;
+vector<int> parse(string s) {
+    int n = s.size(), curr = 0;
+    vector<int> ans;
+    for (int i = 0; i < n; i++) {
+        if (isdigit(s[i])) {
+            int j = i;
+            int curr = 0;
+            while (j < n && isdigit(s[j])) {
+                curr = 10 * curr + (s[j] - '0');
+                j++;
+            }
+            ans.push_back(curr);
+            i = j - 1;
+        }
+    }
+    return ans;
+}
 
-
+// 2, 4 -> B = A % 8
+// 1, 1 -> B ^= 1
+// 7, 5 -> C = A >> B
+// 1, 5 -> B ^= 5
+// 4, 2 -> B ^= C
+// 5, 5 -> ans.push_back(B % 8)
+// 0, 3 -> A >>= 3
+// 3, 0 -> if (A != 0) i = 0
 
 void solve() {
+    vector<int> registers(3);
+    for (int i = 0; i < 3; i++) {
+        string s; getline(cin, s);
+        registers[i] = parse(s)[0];
+    }
+    string s; getline(cin, s);
+    getline(cin, s);
+    vector<int> instructions = parse(s);
+    // string ref = "2,4,1,1,7,5,1,5,4,2,5,5,0,3,3,0";
+    int res = 0;
+    vector<int> candis;
+    for (int i = 0; i < 1024; i++) {
+        candis.push_back(i);
+    }
+    int pw = 1024;
+    for (int k = 0; k < instructions.size(); k++) {
+        // pw *= 1024;
+        vector<int> new_candis;
+        bool found = false;
+        for (int candi : candis) {
+            registers[0] = candi;
+            vector<int> ans;
+            for (int i = 0; i < instructions.size(); i += 2) {
+                if (instructions[i] == 0) {
+                    int combo = instructions[i + 1];
+                    registers[0] = registers[0] >> (combo < 4 ? combo : registers[combo - 4]);
+                }
+                else if (instructions[i] == 1) {
+                    registers[1] ^= instructions[i + 1];
+                }
+                else if (instructions[i] == 2) {
+                    int combo = instructions[i + 1];
+                    registers[1] = (combo < 4 ? combo : registers[combo - 4]) % 8;
+                }
+                else if (instructions[i] == 3)
+                {
+                    if (registers[0]) {
+                        i = instructions[i + 1] - 2;
+                    }
+                }
+                else if (instructions[i] == 4) {
+                    registers[1] ^= registers[2];
+                }
+                else if (instructions[i] == 5) {
+                    int combo = instructions[i + 1];
+                    ans.push_back((combo < 4 ? combo : registers[combo - 4]) % 8);
+                }
+                else if (instructions[i] == 6) {
+                    int combo = instructions[i + 1];
+                    registers[1] = registers[0] >> (combo < 4 ? combo : registers[combo - 4]);
+                }
+                else if (instructions[i] == 7) {
+                    int combo = instructions[i + 1];
+                    registers[2] = registers[0] >> (combo < 4 ? combo : registers[combo - 4]);
+                }
+            }
+            bool ok = true;
+            for (int i = 0; i <= k; i++) {
+                if (i >= ans.size() || ans[i] != instructions[i]) {
+                    ok = false;
+                    break;
+                }
+            }
+            if (ok) {
+                for (int i = 0; i < 8; i++) {
+                    new_candis.push_back(candi + i * pw);
+                }
+            }
+        }
+        pw *= 8;
+        candis = new_candis;
+        sort(candis.begin(), candis.end());
+        cout << candis.size() << " " << candis[0] << " " << candis.back() << endl;
+    }
+    // cout << res << endl;
 
+
+    // string res = "";
+    // for (int i = 0; i < ans.size(); i++) {
+    //     res += to_string(ans[i]);
+    //     if (i != ans.size() - 1) {
+    //         res += ',';
+    //     }
+    // }
+    // cout << res << endl;
 }
 
 
@@ -436,7 +543,7 @@ signed main()
 
     // init();
 
-    sieve();
+    // sieve();
 
 
     ios_base::sync_with_stdio(false);

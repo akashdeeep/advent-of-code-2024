@@ -414,12 +414,78 @@ vector<int> z_arr(string s) {
 // }
 
 
-int n = 8;
+int n = 141, m;
 
 
 
 void solve() {
-
+    vector<string> mat(n);
+    for (int i = 0; i < n; i++) {
+        cin >> mat[i];
+    }
+    m = mat[0].size();
+    int sr, sc; int er, ec;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (mat[i][j] == 'S') {
+                sr = i, sc = j;
+            }
+            if (mat[i][j] == 'E') {
+                er = i, ec = j;
+            }
+        }
+    }
+    int dx[] = {1, 0, -1, 0, 1};
+    map<vector<int>, int> dp;
+    map < vector<int>, vector<vector<int>>>parent;
+    priority_queue<vector<int>, vector<vector<int>>, greater<vector<int>>> pq;
+    pq.push({0, sr, sc, 3, -1, -1, -1});
+    while (pq.size()) {
+        auto top = pq.top(); pq.pop();
+        int d = top[0], r = top[1], s = top[2], dir = top[3];
+        if (r >= n || r < 0 || s >= m || s < 0 || mat[r][s] == '#') continue;
+        if (dp.count({r, s, dir})) {
+            if (dp[ {r, s, dir}] < d) {
+                continue;
+            }
+            if (dp[ {r, s, dir}] == d) {
+                parent[ {r, s, dir}].push_back({top[4], top[5], top[6]});
+                continue;
+            }
+            parent[ {r, s, dir}].push_back({top[4], top[5], top[6]});
+            dp[ {r, s, dir}] = d;
+        }
+        else {
+            parent[ {r, s, dir}].push_back({top[4], top[5], top[6]});
+            dp[ {r, s, dir}] = d;
+        }
+        pq.push({d + 1, r + dx[dir], s + dx[dir + 1], dir, r, s, dir});
+        pq.push({d + 1000, r, s, (dir + 1) % 4, r, s, dir});
+        pq.push({d + 1000, r, s, (dir + 3) % 4, r, s, dir});
+    }
+    int ans = 1e9;
+    for (int i = 0; i < 4; i++) {
+        ans = min(ans, dp.count({er, ec, i}) ? dp[ {er, ec, i}] : (ll)1e9);
+    }
+    cout << ans << endl;
+    set<pair<int, int>> st;
+    queue<vector<int>> q;
+    for (int i = 0; i < 4; i++) {
+        if ((dp.count({er, ec, i}) ? dp[ {er, ec, i}] : 1e9) == ans) {
+            q.push({er, ec, i});
+        }
+    }
+    while (q.size()) {
+        auto temp = q.front(); q.pop();
+        int r = temp[0], s = temp[1], dir = temp[2];
+        // cout << r << " " << s << " " << dir << endl;
+        st.insert({temp[0], temp[1]});
+        for (auto it : parent[temp]) {
+            if (it[0] != -1)
+                q.push(it);
+        }
+    }
+    cout << st.size() << endl;
 }
 
 

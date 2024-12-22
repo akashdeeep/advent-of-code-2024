@@ -414,12 +414,93 @@ vector<int> z_arr(string s) {
 // }
 
 
-int n = 8;
+vector<int> parse(string s) {
+    int n = s.size(), curr = 0;
+    vector<int> ans;
+    for (int i = 0; i < n; i++) {
+        if (isdigit(s[i])) {
+            int j = i;
+            int curr = 0;
+            while (j < n && isdigit(s[j])) {
+                curr = 10 * curr + (s[j] - '0');
+                j++;
+            }
+            ans.push_back(curr);
+            i = j - 1;
+        }
+    }
+    return ans;
+}
+
+int n = 71, m = 71;
 
 
 
 void solve() {
-
+    int dx[] = {1, 0, -1, 0, 1};
+    int sr = 0, sc = 0; int er = n - 1, ec = m - 1;
+    int l = 0, r = 3450;
+    int res;
+    vector<pair<int, int>> objects;
+    for (int i = 0; i < 3450; i++) {
+        string s; getline(cin, s);
+        vector<int> temp = parse(s);
+        objects.push_back({temp[0], temp[1]});
+    }
+    while (l <= r) {
+        int mid = (l + r) / 2;
+        vector<string> mat(n);
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                mat[i] += '.';
+            }
+        }
+        for (int i = 0; i <= mid; i++) {
+            mat[objects[i].first][objects[i].second] = '#';
+        }
+        map<vector<int>, int> dp;
+        map < vector<int>, vector<vector<int>>>parent;
+        priority_queue<vector<int>, vector<vector<int>>, greater<vector<int>>> pq;
+        pq.push({0, sr, sc, 3, -1, -1, -1});
+        while (pq.size()) {
+            auto top = pq.top(); pq.pop();
+            int d = top[0], r = top[1], s = top[2], dir = top[3];
+            if (r >= n || r < 0 || s >= m || s < 0 || mat[r][s] == '#') continue;
+            if (dp.count({r, s, dir})) {
+                if (dp[ {r, s, dir}] < d) {
+                    continue;
+                }
+                if (dp[ {r, s, dir}] == d) {
+                    parent[ {r, s, dir}].push_back({top[4], top[5], top[6]});
+                    continue;
+                }
+                parent[ {r, s, dir}].push_back({top[4], top[5], top[6]});
+                dp[ {r, s, dir}] = d;
+            }
+            else {
+                parent[ {r, s, dir}].push_back({top[4], top[5], top[6]});
+                dp[ {r, s, dir}] = d;
+            }
+            for (int k = 0; k < 4; k++) {
+                pq.push({d + 1, r + dx[k], s + dx[k + 1], k, r, s, dir});
+            }
+            // pq.push({d + 1, r + dx[dir], s + dx[dir + 1], dir, r, s, dir});
+            // pq.push({d + 0, r, s, (dir + 1) % 4, r, s, dir});
+            // pq.push({d + 0, r, s, (dir + 3) % 4, r, s, dir});
+        }
+        int ans = 1e9;
+        for (int i = 0; i < 4; i++) {
+            ans = min(ans, dp.count({er, ec, i}) ? dp[ {er, ec, i}] : (ll)1e9);
+        }
+        if (ans == 1e9) {
+            r = mid - 1;
+        }
+        else {
+            res = mid;
+            l = mid + 1;
+        }
+    }
+    cout << objects[res + 1].first << "," << objects[res + 1].second << endl;
 }
 
 
